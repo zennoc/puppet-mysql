@@ -16,8 +16,8 @@ define mysql::query (
   file { "mysqlquery-${name}.sql":
     ensure  => present,
     mode    => '0600',
-    owner   => 'root',
-    group   => 'root',
+    owner    => $mysql::config_file_owner,
+    group    => $mysql::config_file_group,
     path    => "${mysql_query_filepath}/mysqlquery-${name}.sql",
     content => template('mysql/query.erb'),
     notify  => Exec["mysqlquery-${name}"],
@@ -47,7 +47,7 @@ define mysql::query (
 
   $exec_require = $mysql::real_root_password ? {
     ''      => [ Service['mysql'], File["mysqlquery-${name}.sql"] ],
-    default => [ Service['mysql'], File["mysqlquery-${name}.sql"] , File['/root/.my.cnf'] ],
+    default => [ Service['mysql'], File["mysqlquery-${name}.sql"] , Class['mysql::password'] ],
   }
 
   exec { "mysqlquery-${name}":
